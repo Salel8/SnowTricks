@@ -1,0 +1,40 @@
+{# templates/login/registration.html.twig #}
+{% extends 'base.html.twig' %}
+
+{# ... #}
+
+{% block title %}Page d'Enregistrement{% endblock%}
+
+{% block stylesheets %}
+    {#<link rel="stylesheet" href="templates/registration.css" type="text/css" media="all" />#}
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="{{ asset('css/register.css') }}" rel="stylesheet"/>
+{% endblock%}
+
+{% block body %}
+    {#{% if error %}
+        <div>{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}#}
+
+    <div class="conteneur_titre_contenu">
+        <h1>S'enregistrer</h1>
+
+        
+        {{ form_start(form) }}
+            {{ form_row(form.username) }}
+            {{ form_row(form.email) }}
+            {{ form_row(form.password) }}
+
+            {#<input type="hidden" name="_target_path" value="/posts">#}
+
+            <a href="/login"><p>Déjà un compte ?</p></a>
+
+            <button type="submit" class="btn btn-primary">Créer un compte</button>
+        {{ form_end(form) }}
+
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+{% endblock %}

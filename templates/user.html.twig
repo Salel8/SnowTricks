@@ -1,0 +1,13 @@
+{# templates/user.html.twig #}
+<html>
+    <head></head>
+    <body>
+        {{ form_start(form) }}
+            {{ form_row(form.username) }}
+            {{ form_row(form.email) }}
+            {{ form_row(form.password) }}
+
+            <button type="submit" class="btn btn-primary">Créer</button>
+        {{ form_end(form) }}
+    </body>
+</html>

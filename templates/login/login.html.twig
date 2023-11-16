@@ -1,0 +1,44 @@
+{# templates/login/login.html.twig #}
+{% extends 'base.html.twig' %}
+
+{# ... #}
+
+{% block title %}Page de Connection{% endblock%}
+
+{% block stylesheets %}
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    {#<link rel="stylesheet" href="templates/login.css" type="text/css" media="all" />#}
+    <link href="{{ asset('css/login.css') }}" rel="stylesheet"/>
+{% endblock%}
+
+{% block body %}
+    {% if error %}
+        <div>{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+
+    <div class="conteneur_titre_contenu">
+        <h1>Login</h1>
+
+        <form action="{{ path('app_login') }}" method="post">
+            <label for="username">Nom d'utilisateur :</label>
+            <input type="text" id="username" name="_username" value="{{ last_username }}">
+
+            <label for="password">Mot de passe :</label>
+            <input type="password" id="password" name="_password">
+
+            {# If you want to control the URL the user is redirected to on success #}
+            <input type="hidden" name="_target_path" value="/posts"> 
+
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+            <a href="/password/forget"><p>Mot de passe oublié ?</p></a>
+
+            <button type="submit">Connection</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+{% endblock %}
+{#<a href="{{ path('homepage') }}">Home</a>#}

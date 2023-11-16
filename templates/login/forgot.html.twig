@@ -1,0 +1,35 @@
+{# templates/login/forgot.html.twig #}
+{% extends 'base.html.twig' %}
+
+{# ... #}
+
+{% block title %}Page d'Oublis du mot de passe{% endblock%}
+
+{% block stylesheets %}
+    {#<link rel="stylesheet" href="templates/registration.css" type="text/css" media="all" />#}
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="{{ asset('css/forgot.css') }}" rel="stylesheet"/>
+{% endblock%}
+
+{% block body %}
+    {#{% if error %}
+        <div>{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}#}
+
+    <div class="conteneur_titre_contenu">
+        <h1>Mot de passe oublié</h1>
+
+        
+        {{ form_start(form) }}
+            {{ form_row(form.username) }}
+
+            {#<input type="hidden" name="_target_path" value="/posts">#}
+
+            <button type="submit" class="btn btn-primary">Demande de réinitialisation</button>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+{% endblock %}

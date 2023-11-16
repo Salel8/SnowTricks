@@ -1,0 +1,36 @@
+{# templates/login/reset.html.twig #}
+{% extends 'base.html.twig' %}
+
+{# ... #}
+
+{% block title %}Page de Reset{% endblock%}
+
+{% block stylesheets %}
+    {#<link rel="stylesheet" href="templates/registration.css" type="text/css" media="all" />#}
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="{{ asset('css/reset.css') }}" rel="stylesheet"/>
+{% endblock%}
+
+{% block body %}
+    {#{% if error %}
+        <div>{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}#}
+
+    <div class="conteneur_titre_contenu">
+        <h1>Réinitialisation du mot de passe</h1>
+
+        
+        {{ form_start(form) }}
+            {{ form_row(form.username) }}
+            {{ form_row(form.password) }}
+
+            {#<input type="hidden" name="_target_path" value="/posts">#}
+
+            <button type="submit" class="btn btn-primary">Réinitialisation</button>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+{% endblock %}
