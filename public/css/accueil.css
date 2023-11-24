@@ -1,0 +1,66 @@
+.phrase_accroche{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 500px;
+}
+
+#conteneur_ensemble_figure{
+    /*width: 90%;*/
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+.conteneur_figure{
+    width: 20%;
+    border: 2px solid black;
+    margin-bottom: 5%;
+    margin-left: 2%;
+    margin-right: 2%;
+}
+
+.ensemble_nom_figure_edit_delete{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid black;
+}
+
+img{
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+}
+
+.fleche{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-right: 1%;
+    margin-bottom: 2%;
+}
+
+
+@media all and (max-width : 767px) {
+    #conteneur_ensemble_figure{
+        /*width: 90%;*/
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .conteneur_figure{
+        width: 80%;
+        border: 2px solid black;
+        margin-bottom: 5%;
+        margin-left: 0%;
+        margin-right: 0%;
+    }
+}

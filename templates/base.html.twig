@@ -1,0 +1,46 @@
+{#<!DOCTYPE html>#}
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}Welcome!{% endblock %}</title>
+        
+        {% block stylesheets %}
+            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+            <link href="{{ asset('css/base.css') }}" rel="stylesheet"/>
+        {% endblock %}
+
+        
+    </head>
+    <body>
+        {% block menu %}
+            <div class="menu">
+                <a href="{{ path('all_posts') }}"><p>Accueil</p></a>
+                {% if app.user %}
+                <a href="/logout"><p>Se déconnecter</p></a>
+                {% else %}
+                <a href="{{ path('app_login') }}"><p>Se connecter</p></a>
+                {% endif %}
+                <a href="{{ path('page_add_user') }}"><p>S'enregistrer</p></a>
+            </div>
+
+            <div class="menu_mobile">
+                <a href="{{ path('all_posts') }}"><i class="fa-solid fa-house"></i></a>
+                <a href="{{ path('page_add_user') }}"><i class="fa-solid fa-dungeon"></i></a>
+                {% if app.user %}
+                <a href="/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+                {% else %}
+                <a href="{{ path('app_login') }}"><i class="fa-solid fa-arrow-right-to-bracket"></i></a>
+                {% endif %}
+            </div>
+        {% endblock %}
+        {% block body %}{% endblock %}
+        {% block footer %}
+            <div class="footer">
+                <p>Copyright @ 2023</p>
+            </div>
+        {% endblock %}
+        {% block javascripts %}
+            <script src="https://kit.fontawesome.com/ae436d2433.js" crossorigin="anonymous"></script>
+        {% endblock %}
+    </body>
+</html>

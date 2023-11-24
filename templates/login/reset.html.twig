@@ -6,9 +6,9 @@
 {% block title %}Page de Reset{% endblock%}
 
 {% block stylesheets %}
-    {#<link rel="stylesheet" href="templates/registration.css" type="text/css" media="all" />#}
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link href="{{ asset('css/reset.css') }}" rel="stylesheet"/>
+    {{ parent() }}
 {% endblock%}
 
 {% block body %}

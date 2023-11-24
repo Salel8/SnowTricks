@@ -1,0 +1,21 @@
+.conteneur_information{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 5%;
+    margin-bottom: 5%;
+}
+
+form{
+    width: 60%;
+}
+
+form div{
+    margin-top: 3%;
+}
+
+form div label{
+    margin-right: 2%;
+}
+

@@ -6,9 +6,9 @@
 {% block title %}Page d'Oublis du mot de passe{% endblock%}
 
 {% block stylesheets %}
-    {#<link rel="stylesheet" href="templates/registration.css" type="text/css" media="all" />#}
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link href="{{ asset('css/forgot.css') }}" rel="stylesheet"/>
+    {{ parent() }}
 {% endblock%}
 
 {% block body %}

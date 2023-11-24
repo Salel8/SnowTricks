@@ -7,8 +7,8 @@
 
 {% block stylesheets %}
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    {#<link rel="stylesheet" href="templates/login.css" type="text/css" media="all" />#}
     <link href="{{ asset('css/login.css') }}" rel="stylesheet"/>
+    {{ parent() }}
 {% endblock%}
 
 {% block body %}
@@ -33,7 +33,7 @@
 
             <a href="/password/forget"><p>Mot de passe oublié ?</p></a>
 
-            <button type="submit">Connection</button>
+            <button type="submit">Connexion</button>
         </form>
     </div>
 {% endblock %}

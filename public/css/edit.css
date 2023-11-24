@@ -1,0 +1,139 @@
+.logo_modify_delete{
+    background-color: white;
+}
+
+.logo_modify_delete a{
+    color: black;
+    background-color: white;
+}
+
+.conteneur_ensemble_image_video div:first-child .logo_modify_delete{
+    position: absolute;
+    top: 10%;
+    right: 5%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    background-color: white;
+    width: 8%;
+}
+
+.conteneur_ensemble_image_video div:first-child .logo_modify_delete a{
+    margin-right: 50%;
+    font-size: 150%;
+    color: black;
+    background-color: white;
+}
+
+/*.logo_modify_delete{
+    background-color: white;
+}
+
+.logo_modify_delete a:first-child{
+    /*margin-right: 50%;
+    font-size: 150%;
+    color: black;
+    background-color: white;
+}*/
+
+.conteneur_ensemble_image_video{
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+img{
+    width: 15%;
+    object-fit: cover;
+}
+
+img:first-child{
+    width: 100%;
+    height: 500px;
+}
+
+.conteneur_image_logo{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+video{
+    width: 15%;
+}
+
+.conteneur_information{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 5%;
+    margin-bottom: 5%;
+}
+
+form{
+    width: 60%;
+}
+
+form div{
+    margin-top: 3%;
+}
+
+form div label{
+    margin-right: 2%;
+}
+
+#bouton{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+/*#bouton button{
+    padding: 0%;
+}*/
+
+#bouton p{
+    margin-top: 0%;
+    margin-bottom: 0%;
+    padding-left: 6px;
+    padding-right: 6px;
+    background-color: red;
+    color: white;
+    border: 1px solid black;
+    padding-top: 10%;
+    padding-bottom: 10%;
+}
+
+#bouton a{
+    text-decoration: none;
+}
+
+
+@media all and (max-width : 767px) {
+    .conteneur_ensemble_image_video{
+        flex-direction: column;
+        align-items: center;
+    }
+
+    img{
+        width: 80%;
+    }
+
+    video{
+        width: 80%;
+    }
+
+    img:first-child{
+        width: 100%;
+        height: 300px;
+    }
+
+    .conteneur_ensemble_image_video div:first-child .logo_modify_delete{
+        right: 12%;
+        top: 3%;
+        width: 8%;
+    }
+}
