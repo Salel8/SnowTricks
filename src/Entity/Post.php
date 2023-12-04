@@ -8,6 +8,10 @@ use Doctrine\ORM\Mapping as ORM;
 //use Doctrine\ORM\Mapping\Table;
 //use Doctrine\ORM\Mapping\Column;
 //use Doctrine\DBAL\Types\Types;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+
+use App\Entity\Comment;
 
 
 #[ORM\Entity]
@@ -27,6 +31,14 @@ class Post
     
     #[ORM\Column(type: 'string', length: 550)]
     private string $group_figure;
+
+    /**
+     * One post has many comments. This is the inverse side.
+     * @var Collection<int, Comment>
+     */
+    #[ORM\OneToMany(mappedBy: 'id_post', targetEntity: Comment::class)]
+    //#[ORM\JoinColumn(name: 'comments', referencedColumnName: 'id')]
+    private Collection $comments;
     
 
     public function getId(): int|null
@@ -62,5 +74,18 @@ class Post
     public function getGroupFigure()
     {
         return $this->group_figure;
+    }
+
+    /*public function setComments($comments): void
+    {
+        $this->comments = $comments;
+    }*/
+
+    /**
+     * @return Collection<int, Comment>
+     */
+    public function getComments(): Collection
+    {
+        return $this->comments;
     }
 }

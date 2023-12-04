@@ -10,6 +10,7 @@ use App\Form\PostType;
 use App\Entity\Post;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Video_post;
 use App\Form\VideoType;
@@ -17,9 +18,13 @@ use App\Entity\Picture_post;
 use App\Form\PictureType;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Controller\CommentController;
+use App\Entity\Comment;
+use App\Repository\PostRepository;
+use App\Form\CommentType;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 class PostController extends AbstractController
 {
@@ -111,30 +116,45 @@ class PostController extends AbstractController
 
 
     #[Route('/posts', name: 'all_posts')]
-    public function getLastPosts(EntityManagerInterface $entityManager): Response
+    public function getLastPosts(EntityManagerInterface $entityManager, Request $request): Response
     {
-        $repository = $entityManager->getRepository(Post::class);
-        // look for *all* Product objects
-        $posts = $repository->findAll();
+        $page = $request->get('page', 1);
+        $limit = $request->get('limit', 8);
+
+        $qb = $entityManager->createQueryBuilder()
+            ->from('App\Entity\Post', 'p')
+            ->select('p')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        $posts = $qb->getQuery()->getResult();
+
+        $nbposts = count($entityManager->getRepository(Post::class)->findAll());
+
+        if (($nbposts % $limit) > 0){
+            $nbpage = intdiv($nbposts, $limit) + 1;
+        } else{
+            $nbpage = intdiv($nbposts, $limit);
+        }
 
         $pictures=[];
         foreach ($posts as $post) {
-            //echo 'Ceci est une boucle for en PHP';
             $picture = $entityManager->getRepository(Picture_post::class)->findOneBy(['id_post' => $post->getId()]);
             if (null!==$picture){
                 $pictures[$post->getId()] = $picture->getPictureFilename();
-            }
-            
+            }            
         }
 
         return $this->render('accueil.html.twig', [
             'posts' => $posts,
-            'pictures' => $pictures
+            'pictures' => $pictures,
+            'page' => $page,
+            'nbpage' => $nbpage,
         ]);
     }
 
     #[Route('/post/{id}', name: 'post_show')]
-    public function show(int $id, EntityManagerInterface $entityManager): Response
+    public function show(int $id, EntityManagerInterface $entityManager, Request $request): Response
     {
         $post = $entityManager->getRepository(Post::class)->find($id);
 
@@ -154,11 +174,72 @@ class PostController extends AbstractController
             ['id' => 'ASC']
         );
 
+
+        $comment = new Comment();
+
+        $form = $this->createForm(CommentType::class, $comment);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $comment = $form->getData();
+            $comment->setDate(new \DateTimeImmutable());
+            $comment->setIdPost($post);
+            $entityManager->persist($comment);
+            $entityManager->flush();
+        }
+
+
+        $page = $request->get('page', 1);
+        $limit = $request->get('limit', 2);
+
+        $qb = $entityManager->createQueryBuilder()
+            ->from('App\Entity\Comment', 'c')
+            ->select('c')
+            ->setParameter('val', $id)
+            ->andwhere('c.id_post = :val')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        $comments = $qb->getQuery()->getResult();
+
+        if ((count($post->getComments()) % $limit) > 0){
+            $nbpage = intdiv(count($post->getComments()), $limit) + 1;
+        } else{
+            $nbpage = intdiv(count($post->getComments()), $limit);
+        }
+
+        function get_gravatar_url( $email ) {
+            // Trim leading and trailing whitespace from
+            // an email address and force all characters
+            // to lower case
+            $address = strtolower( trim( $email ) );
+          
+            // Create an SHA256 hash of the final string
+            $hash = hash( 'sha256', $address );
+          
+            // Grab the actual image URL
+            return 'https://www.gravatar.com/avatar/' . $hash;
+        }
+
+        $gravatar=[];
+        foreach($comments as $comment){
+            $gravatar[$comment->getId()] = get_gravatar_url( $comment->getEmail() );
+        }
+    
+
         return $this->render('detail.html.twig', [
+            //'post_name' => $post->getName(),
+            //'post_description' => $post->getDescription(),
             'post_group_figure' => $post->getGroupFigure(),
             'post' => $post,
             'pictures' => $pictures,
-            'videos' => $videos
+            'videos' => $videos,
+            'comments' => $comments,
+            'form' => $form->createView(),
+            'page' => $page,
+            'nbpage' => $nbpage,
+            'gravatar' => $gravatar,
         ]);
     }
 
@@ -187,6 +268,7 @@ class PostController extends AbstractController
 
         $form = $this->createForm(PostType::class, $post);
         $form->handleRequest($request);
+
 
         if ($form->isSubmitted() && $form->isValid()) {
 

@@ -40,6 +40,50 @@
         <p>{{post.description}}</p>
         <p>{{post_group_figure}}</p>
     </div>
+
+    <div class="conteneur_ajout_commentaire">
+        <h2>Ajoutez votre commentaire</h2>
+        {{ form_start(form) }}
+            {{ form_row(form.author) }}
+            {{ form_row(form.email) }}
+            {{ form_row(form.content) }}
+            {{ form_row(form.date) }}
+
+            <button type="submit" class="btn btn-primary">Créer</button>
+        {{ form_end(form) }}
+    </div>
+
+    <div class="conteneur_commentaires">
+        <h2>Commentaires</h2>
+            {#{% if comments is defined %}#}
+                {% for comment in comments %}
+                    <div class="conteneur_photo_commentaire">
+                        {#<p>{{ gravatar[comment.id] }}</p>#}
+                        <img src={{ gravatar[comment.id] }} alt="aa" class="image_gravatar" />
+                        <div class="conteneur_commentaire">
+                            <p>{{ comment.author }}</p>
+                            <p>{{ comment.content }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            {#{% endif %}#}
+    </div>
+
+    <div class="pagination">
+        {% if page > 2 %}
+            <a href="/post/{{post.id}}?page=1"><p> < .&nbsp;</p></a>
+        {% endif %}
+        {% if page > 1 %}
+            <a href="/post/{{post.id}}?page={{ page - 1 }}"><p>&nbsp;{{ page - 1 }} .&nbsp;</p></a>
+        {% endif %}
+        <p> {{ page }} </p>
+        {% if nbpage > page %}
+            <a href="/post/{{post.id}}?page={{ page + 1 }}"><p>&nbsp;. {{ page + 1 }}&nbsp;</p></a>
+        {% endif %}
+        {% if nbpage > page + 1 %}
+            <a href="/post/{{post.id}}?page={{ nbpage }}"><p>&nbsp;. > </p></a>
+        {% endif %}
+    </div>
     
 {% endblock %}
 
