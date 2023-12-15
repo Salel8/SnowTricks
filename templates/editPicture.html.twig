@@ -1,4 +1,4 @@
-{# templates/new.html.twig #}
+{# templates/editPicture.html.twig #}
 {% extends 'base.html.twig' %}
 
 {# ... #}
@@ -12,15 +12,11 @@
 
 {% block body %}    
     <div class="conteneur_information">
-        <h2>Ajoutez votre article</h2>
+        <h2>Modifiez votre image</h2>
         {{ form_start(form) }}
-            {{ form_row(form.name) }}
-            {{ form_row(form.group_figure) }}
-            {{ form_row(form.description) }}
             {{ form_row(form.picture) }}
-            {{ form_row(form.video) }}
 
-            <button type="submit" class="btn btn-primary">Ajouter</button>
+            <button type="submit" class="btn btn-primary">Modifier</button>
         {{ form_end(form) }}
     </div>
     

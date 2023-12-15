@@ -56,6 +56,17 @@ img{
     color: blue;
 }
 
+#message_flash{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    background-color: greenyellow;
+    width: 50%;
+    margin-bottom: 6%;
+    color: green;
+}
+
 
 @media all and (max-width : 767px) {
     #conteneur_ensemble_figure{
@@ -73,5 +84,9 @@ img{
         margin-bottom: 5%;
         margin-left: 0%;
         margin-right: 0%;
+    }
+
+    #message_flash{
+        width: 100%;
     }
 }

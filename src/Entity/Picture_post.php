@@ -15,7 +15,7 @@ class Picture_post
     #[ORM\GeneratedValue]
     private int|null $id=null;
 
-    #[ORM\ManyToOne(targetEntity: Post::class)]
+    #[ORM\ManyToOne(targetEntity: Post::class, cascade: ["persist"])]
     #[JoinColumn(name: 'id_post_id', referencedColumnName: 'id')]
     private object $id_post;
     

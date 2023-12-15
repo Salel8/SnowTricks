@@ -19,3 +19,21 @@ form div label{
     margin-right: 2%;
 }
 
+form button{
+    margin-top: 5%;
+}
+
+
+@media all and (max-width : 767px) {
+    form div{
+        margin-top: 8%;
+    }
+    
+    form div label{
+        margin-right: 4%;
+    }
+    
+    form button{
+        margin-top: 15%;
+    }
+}

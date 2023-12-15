@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 //use App\Repository\CommentRepository;
 //use Doctrine\ORM\Mapping\Entity;
 //use Doctrine\ORM\Mapping\Table;
@@ -20,15 +21,23 @@ class Comment
     #[ORM\GeneratedValue]
     private int|null $id=null;
 
+    #[Assert\NotBlank(message: "L'auteur est obligatoire")]
+    #[Assert\Length(min: 3, max: 140, minMessage: "L'auteur doit faire au moins {{ limit }} caractères", maxMessage: "L'auteur ne peut pas faire plus de {{ limit }} caractères")]
     #[ORM\Column(type: 'string', length: 140)]
     private string $author;
     
+    #[Assert\NotBlank]
+    #[Assert\Type(\DateTimeInterface::class)]
     #[ORM\Column(type: 'datetime', name: 'date')]
     private ?\DateTimeInterface $date;
     
+    #[Assert\NotBlank(message: "Le contenu est obligatoire")]
+    #[Assert\Length(min: 3, max: 5000, minMessage: "Le contenu doit faire au moins {{ limit }} caractères", maxMessage: "Le contenu ne peut pas faire plus de {{ limit }} caractères")]
     #[ORM\Column(type: 'string', length: 5000)]
     private string $content;
 
+    #[Assert\NotBlank(message: "Le travail est obligatoire")]
+    #[Assert\Length(min: 3, max: 500, minMessage: "L'email doit faire au moins {{ limit }} caractères", maxMessage: "L'email ne peut pas faire plus de {{ limit }} caractères")]
     #[ORM\Column(type: 'string', length: 500)]
     private string $email;
 

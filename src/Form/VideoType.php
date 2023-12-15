@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\File;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class VideoType extends AbstractType
 {
@@ -15,7 +16,10 @@ class VideoType extends AbstractType
     {
         $builder
             // ...
-            ->add('video', FileType::class, [
+            ->add('video', TextType::class, [
+                'mapped' => false
+                ])
+            /*->add('video', FileType::class, [
                 'label' => 'Video (PDF file)',
 
                 // unmapped means that this field is not associated to any entity property
@@ -29,7 +33,7 @@ class VideoType extends AbstractType
                 // in the associated entity, so you can use the PHP constraint classes
                 'constraints' => [
                     new File([
-                        'maxSize' => '1024k',
+                        'maxSize' => '1000024k',
                         'mimeTypes' => [
                             //'application/pdf',
                             //'application/x-pdf',
@@ -38,7 +42,7 @@ class VideoType extends AbstractType
                         'mimeTypesMessage' => 'Please upload a valid PDF document',
                     ])
                 ],
-            ])
+            ])*/
             // ...
         ;
     }

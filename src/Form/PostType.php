@@ -22,6 +22,12 @@ class PostType extends AbstractType
             ->add('name', TextType::class)
             ->add('description', TextareaType::class)
             ->add('group_figure', TextType::class)
+            //->add('video', TextType::class)
+            ->add('video', TextType::class, [
+                'mapped' => false,
+
+                'required' => false
+                ])
             ->add('picture', FileType::class, [
                 'label' => 'Picture (JPEG ou PNG file)',
 
@@ -53,7 +59,7 @@ class PostType extends AbstractType
                     ])
                 ],
             ])
-            ->add('video', FileType::class, [
+            /*->add('video', FileType::class, [
                 'label' => 'Video (PDF file)',
 
                 'multiple' => true,
@@ -71,18 +77,18 @@ class PostType extends AbstractType
                     new All([
                         'constraints' => [
                             new File([
-                                'maxSize' => '1024k',
+                                'maxSize' => '500Mi',
                                 'mimeTypes' => [
                                     //'application/pdf',
                                     //'application/x-pdf',
                                     'video/mp4',
                                 ],
-                                'mimeTypesMessage' => 'Please upload a valid PDF document',
+                                'mimeTypesMessage' => 'Please upload a valid MP4 video',
                             ])
                         ],
                     ])
                 ]
-            ])
+            ])*/
             //->add('video', FileType::class, [
                 //'label' => 'Video (PDF file)',
                 //'multiple' => true,

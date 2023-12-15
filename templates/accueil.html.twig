@@ -16,10 +16,16 @@
 
 {% block body %}
     <div class="phrase_accroche">
-        <h1>Phrase d'acroche</h1>
+        <h1>SnowTricks</h1>
     </div>
     <div class="fleche">
         <a href="{{ path('all_posts') }}#conteneur_ensemble_figure"><i class="fa-solid fa-arrow-down"></i></a>
+    </div>
+    <div id="message_flash">
+        {% for message in app.flashes('notification') %}
+            {{ message }}
+            {#<button type="button"><span aria-hidden="true">&times;</span></button>#}
+        {% endfor %}
     </div>
     <div id="conteneur_ensemble_figure">
         {% if posts is defined %}
@@ -34,10 +40,11 @@
                     {% endif %}
                 </div>
                 <div class="ensemble_nom_figure_edit_delete">
-                    <a href="{{ path('post_show', {id: post.id}) }}"><p>{{post.name}}</p></a>
+                    <a href="{{ path('post_show', {slug: post.name}) }}"><p>{{post.name}}</p></a>
                     {% if app.user %}
-                    <a href="{{ path('post_edit', {id: post.id}) }}"><i class="fa-solid fa-pen"></i></a>
-                    <a href="{{ path('post_delete', {id: post.id}) }}"><i class="fa-solid fa-trash"></i></a>
+                    <a href="{{ path('post_edit', {slug: post.name}) }}"><i class="fa-solid fa-pen"></i></a>
+                    {#<a href="{{ path('post_delete', {id: post.id}) }}"><i class="fa-solid fa-trash"></i></a>#}
+                    <a href="/delete?choice=post&postid={{ post.id }}"><i class="fa-solid fa-trash"></i></a>
                     {% endif %}
                 </div>
             </div>

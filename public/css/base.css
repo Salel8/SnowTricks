@@ -3,6 +3,7 @@
     flex-direction: row;
     justify-content: flex-end;
     border-bottom: 1px solid black;
+    margin-bottom: 10%;
 }
 
 .menu a{
@@ -24,6 +25,11 @@
 
 .menu_mobile{
     display: none;
+}
+
+a{
+    color: blue;
+    text-decoration: none;
 }
 
 
