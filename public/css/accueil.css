@@ -45,6 +45,17 @@ img{
     margin-bottom: 2%;
 }
 
+.pagination{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.pagination a{
+    text-decoration: none;
+    color: blue;
+}
+
 
 @media all and (max-width : 767px) {
     #conteneur_ensemble_figure{
