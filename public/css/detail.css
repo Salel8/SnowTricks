@@ -1,0 +1,74 @@
+#logo_modify_delete{
+    position: absolute;
+    top: 10%;
+    right: 5%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    background-color: white;
+    width: 8%;
+}
+
+#logo_modify_delete a{
+    margin-right: 50%;
+    font-size: 150%;
+    color: black;
+    background-color: white;
+}
+
+
+
+.conteneur_ensemble_image_video{
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+img{
+    width: 15%;
+    object-fit: cover;
+}
+
+img:first-child{
+    width: 100%;
+    height: 500px;
+}
+
+video{
+    width: 15%;
+}
+
+.conteneur_information{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+@media all and (max-width : 767px) {
+    .conteneur_ensemble_image_video{
+        flex-direction: column;
+        align-items: center;
+    }
+
+    img{
+        width: 80%;
+    }
+
+    video{
+        width: 80%;
+    }
+    
+    img:first-child{
+        width: 100%;
+        height: 300px;
+    }
+
+    #logo_modify_delete{
+        right: 12%;
+        top: 3%;
+        width: 8%;
+    }
+}
