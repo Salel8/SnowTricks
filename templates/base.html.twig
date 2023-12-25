@@ -21,6 +21,9 @@
                 <a href="{{ path('app_login') }}"><p>Se connecter</p></a>
                 {% endif %}
                 <a href="{{ path('page_add_user') }}"><p>S'enregistrer</p></a>
+                {% if app.user %}
+                <a href="{{ path('page_add_post') }}"><p>Ajouter article</p></a>
+                {% endif %}
             </div>
 
             <div class="menu_mobile">

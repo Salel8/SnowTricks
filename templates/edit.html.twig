@@ -17,28 +17,33 @@
             <div class="conteneur_image_logo">
                 <img src="{{ asset('uploads/picture/' ~ pictur.pictureFilename) }}" alt="Symfony!"/>
                 <div class="logo_modify_delete">
-                    <a href="{{ path('picture_edit', {id: pictur.id}) }}"><i class="fa-solid fa-pen"></i></a>
-                    <a href="{{ path('picture_delete', {id: pictur.id}) }}"><i class="fa-solid fa-trash"></i></a>
+                    {#<a href="{{ path('picture_edit', {id: pictur.id}) }}"><i class="fa-solid fa-pen"></i></a>#}
+                    {#<a href="{{ path('picture_delete', {id: pictur.id}) }}"><i class="fa-solid fa-trash"></i></a>#}
+                    <a href="/picture/edit/{{ pictur.id }}?postid={{ post.id }}&postname={{ post.name }}"><i class="fa-solid fa-pen"></i></a>
+                    <a href="/delete?choice=picture&postid={{ post.id }}&postname={{ post.name }}&pictureid={{ pictur.id }}"><i class="fa-solid fa-trash"></i></a>
                 </div>
             </div>
             {% endfor %}
         {% endif %}
         {% if videos is defined %}
-            {% for vide in videos %}
-            {#mettre l'ensemble des figures#}
+            {% for video in videos %}
             <div class="conteneur_image_logo">
-                <video>
-                    <source src={{ asset('uploads/video/' ~ vide.videoFilename) }}" type="video/mp4"> 
-                </video>
-                <div id="logo_modify_delete">
-                    <a href="{{ path('video_edit', {id: video.id}) }}"><i class="fa-solid fa-pen"></i></a>
-                    <a href="{{ path('video_delete', {id: video.id}) }}"><i class="fa-solid fa-trash"></i></a>
+                {#<div>#}
+                    {#<source src={{ asset('uploads/video/' ~ vide.videoFilename) }}" type="video/mp4">#}
+                    <iframe width="100%" height="100%" margin-top="5%" src="{{video.videoFilename}}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                {#</div>#}
+                <div class="logo_modify_delete">
+                    {#<a href="{{ path('video_edit', {id: vide.id}) }}"><i class="fa-solid fa-pen"></i></a>#}
+                    {#<a href="{{ path('video_delete', {id: vide.id}) }}"><i class="fa-solid fa-trash"></i></a>#}
+                    <a href="/video/edit/{{ video.id }}?postid={{ post.id }}&postname={{ post.name }}"><i class="fa-solid fa-pen"></i></a>
+                    <a href="/delete?choice=video&postid={{ post.id }}&postname={{ post.name }}&videoid={{ video.id }}"><i class="fa-solid fa-trash"></i></a>
                 </div>
             </div>
             {% endfor %}
         {% endif %}
     </div>
     <div class="conteneur_information">
+        <h2>Modifiez les informations de votre article</h2>
         {{ form_start(form) }}
             {{ form_row(form.name) }}
             {{ form_row(form.description) }}
@@ -47,8 +52,9 @@
             {{ form_row(form.video) }}
 
             <div id="bouton">
-                <a href="{{ path('post_delete', {id: post.id}) }}"><p>Suppression</p></a>
-                <button type="submit" class="btn btn-primary">Créer</button>
+                {#<a href="{{ path('post_delete', {id: post.id}) }}"><p>Supprimer</p></a>#}
+                <a href="/delete?choice=post&postid={{ post.id }}"><p>Supprimer</p></a>
+                <button type="submit" class="btn btn-primary">Modifier</button>
             </div>
         {{ form_end(form) }}
     </div>

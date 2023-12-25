@@ -10,12 +10,15 @@ use Doctrine\ORM\Mapping as ORM;
 //use Doctrine\DBAL\Types\Types;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 use App\Entity\Comment;
 
 
 #[ORM\Entity]
 #[ORM\Table(name: 'post')]
+#[UniqueEntity('name')]
 class Post
 {   
     #[ORM\Id]
@@ -23,12 +26,19 @@ class Post
     #[ORM\GeneratedValue]
     private int|null $id=null;
 
-    #[ORM\Column(type: 'string', length: 140)]
+    #[Assert\UniqueEntity(message: "Le titre de l'article dot être unique")]
+    #[Assert\NotBlank(message: "Le titre est obligatoire")]
+    #[Assert\Length(min: 3, max: 140, minMessage: "Le titre doit faire au moins {{ limit }} caractères", maxMessage: "Le titre ne peut pas faire plus de {{ limit }} caractères")]
+    #[ORM\Column(type: 'string', length: 140, unique: true)]
     private string $name;
     
+    #[Assert\NotBlank(message: "La description est obligatoire")]
+    #[Assert\Length(min: 3, max: 1000, minMessage: "La description doit faire au moins {{ limit }} caractères", maxMessage: "La description ne peut pas faire plus de {{ limit }} caractères")]
     #[ORM\Column(type: 'string', length: 1000)]
     private string $description;
     
+    #[Assert\NotBlank(message: "Le groupe est obligatoire")]
+    #[Assert\Length(min: 3, max: 550, minMessage: "Le groupe doit faire au moins {{ limit }} caractères", maxMessage: "Le groupe ne peut pas faire plus de {{ limit }} caractères")]
     #[ORM\Column(type: 'string', length: 550)]
     private string $group_figure;
 

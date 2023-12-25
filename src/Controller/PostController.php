@@ -25,12 +25,15 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Notifier\Notification\Notification;
+use Symfony\Component\Notifier\NotifierInterface;
 
 class PostController extends AbstractController
 {
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access the admin dashboard.')]
     #[Route('/posts/new', name: 'page_add_post')]
-    public function new(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger, ValidatorInterface $validator, NotifierInterface $notifier): Response
     {
         $post = new Post();
 
@@ -40,8 +43,16 @@ class PostController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $post = $form->getData();
+
+            $errors = $validator->validate($post);
+            if (count($errors) > 0) {
+                return new Response((string) $errors, 400);
+            }
+
             $entityManager->persist($post);
             $entityManager->flush();
+
+            $notifier->send(new Notification('Vous avez créé un nouvel article.', ['browser']));
 
             /** @var UploadedFile $pictureFile */
             $pictureFiles = $form->get('picture')->getData();
@@ -70,6 +81,12 @@ class PostController extends AbstractController
                     // instead of its contents
                     $picture->setPictureFilename($newPictureFilename);
                     $picture->setIdPost($post);
+
+                    $errors = $validator->validate($picture);
+                    if (count($errors) > 0) {
+                        return new Response((string) $errors, 400);
+                    }
+
                     $entityManager->persist($picture);
                     $entityManager->flush();
                 }
@@ -78,38 +95,26 @@ class PostController extends AbstractController
             /** @var UploadedFile $videoFile */
             $videoFiles = $form->get('video')->getData();
 
-            foreach($videoFiles as $videoFile){
-                // this condition is needed because the 'video' field is not required
-                // so the PDF file must be processed only when a file is uploaded
-                if ($videoFile) {
-                    $originalVideoFilename = pathinfo($videoFile->getClientOriginalName(), PATHINFO_FILENAME);
-                    // this is needed to safely include the file name as part of the URL
-                    $safeVideoFilename = $slugger->slug($originalVideoFilename);
-                    $newVideoFilename = $safeVideoFilename.'-'.uniqid().'.'.$videoFile->guessExtension();
+            if ($videoFiles) {
+                $video = new Video_post();
+                $video->setVideoFilename($videoFiles);
+                $video->setIdPost($post);
 
-                    // Move the file to the directory where videos are stored
-                    try {
-                        $videoFile->move(
-                            $this->getParameter('videos_directory'),
-                            $newVideoFilename
-                        );
-                    } catch (FileException $e) {
-                        // ... handle exception if something happens during file upload
-                    }
-
-                    $video = new Video_post();
-                    // updates the 'videoFilename' property to store the PDF file name
-                    // instead of its contents
-                    $video->setVideoFilename($newVideoFilename);
-                    $video->setIdPost($post);
-                    $entityManager->persist($video);
-                    $entityManager->flush();
+                $errors = $validator->validate($video);
+                if (count($errors) > 0) {
+                    return new Response((string) $errors, 400);
                 }
+                $entityManager->persist($video);
+                $entityManager->flush();
             }
+
+            return $this->redirectToRoute('all_posts');
         }
 
             return $this->render('new.html.twig', array(
                 'form' => $form->createView(),
+                //'form_video' => $form_video->createView(),
+                //'form_picture' => $form_picture->createView(),
             ));
         }
 
@@ -124,6 +129,8 @@ class PostController extends AbstractController
         $qb = $entityManager->createQueryBuilder()
             ->from('App\Entity\Post', 'p')
             ->select('p')
+            //->setParameter('val', $id)
+            //->andwhere('p.id = :val')
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit);
 
@@ -142,7 +149,7 @@ class PostController extends AbstractController
             $picture = $entityManager->getRepository(Picture_post::class)->findOneBy(['id_post' => $post->getId()]);
             if (null!==$picture){
                 $pictures[$post->getId()] = $picture->getPictureFilename();
-            }            
+            }
         }
 
         return $this->render('accueil.html.twig', [
@@ -153,24 +160,24 @@ class PostController extends AbstractController
         ]);
     }
 
-    #[Route('/post/{id}', name: 'post_show')]
-    public function show(int $id, EntityManagerInterface $entityManager, Request $request): Response
+    #[Route('/post/{slug}', name: 'post_show')]
+    public function show(string $slug, EntityManagerInterface $entityManager, Request $request, ValidatorInterface $validator): Response
     {
-        $post = $entityManager->getRepository(Post::class)->find($id);
+        $post = $entityManager->getRepository(Post::class)->findOneBy(['name' => $slug]);
 
         if (!$post) {
             throw $this->createNotFoundException(
-                'No post found for id '.$id
+                'No post found for name '.$slug
             );
         }
 
         $pictures = $entityManager->getRepository(Picture_post::class)->findBy(
-            ['id_post' => $id],
+            ['id_post' => $post->getId()],
             ['id' => 'ASC']
         );
 
         $videos = $entityManager->getRepository(Video_post::class)->findBy(
-            ['id_post' => $id],
+            ['id_post' => $post->getId()],
             ['id' => 'ASC']
         );
 
@@ -185,10 +192,15 @@ class PostController extends AbstractController
             $comment = $form->getData();
             $comment->setDate(new \DateTimeImmutable());
             $comment->setIdPost($post);
+
+            $errors = $validator->validate($comment);
+            if (count($errors) > 0) {
+                return new Response((string) $errors, 400);
+            }
+
             $entityManager->persist($comment);
             $entityManager->flush();
         }
-
 
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 2);
@@ -196,7 +208,7 @@ class PostController extends AbstractController
         $qb = $entityManager->createQueryBuilder()
             ->from('App\Entity\Comment', 'c')
             ->select('c')
-            ->setParameter('val', $id)
+            ->setParameter('val', $post->getId())
             ->andwhere('c.id_post = :val')
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit);
@@ -225,12 +237,14 @@ class PostController extends AbstractController
         $gravatar=[];
         foreach($comments as $comment){
             $gravatar[$comment->getId()] = get_gravatar_url( $comment->getEmail() );
-        }
-    
+        }    
+       
+
+        $date = new \DateTime();
+        $date_jour = $date->format('\l\e d/m/Y');
+
 
         return $this->render('detail.html.twig', [
-            //'post_name' => $post->getName(),
-            //'post_description' => $post->getDescription(),
             'post_group_figure' => $post->getGroupFigure(),
             'post' => $post,
             'pictures' => $pictures,
@@ -240,24 +254,25 @@ class PostController extends AbstractController
             'page' => $page,
             'nbpage' => $nbpage,
             'gravatar' => $gravatar,
+            'date_jour' => $date_jour,
         ]);
     }
 
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access the admin dashboard.')]
-    #[Route('/post/edit/{id}', name: 'post_edit')]
-    public function update(int $id, Request $request, EntityManagerInterface $entityManager): Response
+    #[Route('/post/edit/{slug}', name: 'post_edit')]
+    public function update(string $slug, Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger, ValidatorInterface $validator): Response
     {
-        $post_db = $entityManager->getRepository(Post::class)->find($id);
+        $post_db = $entityManager->getRepository(Post::class)->findOneBy(['name' => $slug]);
         $pictures_db = $entityManager->getRepository(Picture_post::class)->findBy(
-            ['id_post' => $id]
+            ['id_post' => $post_db->getId()]
         );
         $videos_db = $entityManager->getRepository(Video_post::class)->findBy(
-            ['id_post' => $id]
+            ['id_post' => $post_db->getId()]
         );
 
         if (!$post_db) {
             throw $this->createNotFoundException(
-                'No post found for id '.$id
+                'No post found for name '.$slug
             );
         }
 
@@ -278,11 +293,71 @@ class PostController extends AbstractController
             $post_db->setDescription($post->getDescription());
             $post_db->setGroupFigure($post->getGroupFigure());
 
+            $errors = $validator->validate($post_db);
+            if (count($errors) > 0) {
+                return new Response((string) $errors, 400);
+            }
+
             $entityManager->persist($post_db);
             $entityManager->flush();
 
+            /** @var UploadedFile $pictureFile */
+            $pictureFiles = $form->get('picture')->getData();
+
+            foreach ($pictureFiles as $pictureFile) {
+                // this condition is needed because the 'picture' field is not required
+                // so the PDF file must be processed only when a file is uploaded
+                if ($pictureFile) {
+                    $originalPictureFilename = pathinfo($pictureFile->getClientOriginalName(), PATHINFO_FILENAME);
+                    // this is needed to safely include the file name as part of the URL
+                    $safePictureFilename = $slugger->slug($originalPictureFilename);
+                    $newPictureFilename = $safePictureFilename.'-'.uniqid().'.'.$pictureFile->guessExtension();
+
+                    // Move the file to the directory where pictures are stored
+                    try {
+                        $pictureFile->move(
+                            $this->getParameter('pictures_directory'),
+                            $newPictureFilename
+                        );
+                    } catch (FileException $e) {
+                        // ... handle exception if something happens during file upload
+                    }
+
+                    $picture = new Picture_post();
+                    // updates the 'pictureFilename' property to store the PDF file name
+                    // instead of its contents
+                    $picture->setPictureFilename($newPictureFilename);
+                    $picture->setIdPost($post_db);
+
+                    $errors = $validator->validate($picture);
+                    if (count($errors) > 0) {
+                        return new Response((string) $errors, 400);
+                    }
+
+                    $entityManager->persist($picture);
+                    $entityManager->flush();
+                }
+            }
+
+            /** @var UploadedFile $videoFile */
+            $videoFiles = $form->get('video')->getData();
+
+            if ($videoFiles) {
+                $video = new Video_post();
+                $video->setVideoFilename($videoFiles);
+                $video->setIdPost($post_db);
+
+                $errors = $validator->validate($video);
+                if (count($errors) > 0) {
+                    return new Response((string) $errors, 400);
+                }
+                $entityManager->persist($video);
+                $entityManager->flush();
+            }
+
+
             return $this->redirectToRoute('post_show', [
-                'id' => $post_db->getId()
+                'slug' => $post_db->getName()
             ]);
 
         }
@@ -297,7 +372,7 @@ class PostController extends AbstractController
 
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access the admin dashboard.')]
     #[Route('/picture/edit/{id}', name: 'picture_edit')]
-    public function updatePicture(int $id, Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
+    public function updatePicture(int $id, Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger, ValidatorInterface $validator): Response
     {
         $picture_db = $entityManager->getRepository(Picture_post::class)->find($id);
 
@@ -307,7 +382,10 @@ class PostController extends AbstractController
             );
         }
 
-        $picture = new Picture_post();        
+        $post_name = $request->get('postname', 'vide');
+
+        $picture = new Picture_post();
+        
 
         $form = $this->createForm(PictureType::class, $picture);
         $form->handleRequest($request);
@@ -346,23 +424,29 @@ class PostController extends AbstractController
 
             $picture_db->setPictureFilename($newPictureFilename);
 
+            $errors = $validator->validate($picture_db);
+            if (count($errors) > 0) {
+                return new Response((string) $errors, 400);
+            }
+
             $entityManager->persist($picture_db);
             $entityManager->flush();
 
-            return $this->redirectToRoute('post_show', [
-                'id' => $picture_db->getIdPost()
+    
+            return $this->redirectToRoute('post_edit', [
+                'slug' => $post_name
             ]);
 
         }
 
-        return $this->render('new2.html.twig', array(
+        return $this->render('editPicture.html.twig', array(
             'form' => $form->createView(),
         ));
     }
 
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access the admin dashboard.')]
     #[Route('/video/edit/{id}', name: 'video_edit')]
-    public function updateVideo(int $id, Request $request, EntityManagerInterface $entityManager): Response
+    public function updateVideo(int $id, Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
         $video_db = $entityManager->getRepository(Video_post::class)->find($id);
 
@@ -372,7 +456,10 @@ class PostController extends AbstractController
             );
         }
 
-        $video = new Video_post();        
+        $post_name = $request->get('postname', 'vide');
+
+        $video = new Video_post();
+        
 
         $form = $this->createForm(VideoType::class, $video);
         $form->handleRequest($request);
@@ -380,47 +467,32 @@ class PostController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             
-            unlink($this->getParameter('videos_directory').'/'.$video_db->getPictureFilename());
 
             /** @var UploadedFile $pictureFile */
-            //$videoFile = $form->getData();
             $videoFile = $form->get('video')->getData();
 
             // this condition is needed because the 'video' field is not required
             // so the PDF file must be processed only when a file is uploaded
             if ($videoFile) {
-                $originalVideoFilename = pathinfo($videoFile->getClientOriginalName(), PATHINFO_FILENAME);
-                // this is needed to safely include the file name as part of the URL
-                $safeVideoFilename = $slugger->slug($originalVideoFilename);
-                $newVideoFilename = $safeVideoFilename.'-'.uniqid().'.'.$videoFile->guessExtension();
+                
+                $video_db->setVideoFilename($videoFile);
 
-                // Move the file to the directory where pictures are stored
-                try {
-                    $videoFile->move(
-                        $this->getParameter('videos_directory'),
-                        $newVideoFilename
-                    );
-                } catch (FileException $e) {
-                    // ... handle exception if something happens during file upload
+                $errors = $validator->validate($video_db);
+                if (count($errors) > 0) {
+                    return new Response((string) $errors, 400);
                 }
 
-                // updates the 'videoFilename' property to store the PDF file name
-                // instead of its contents
-                $video->setVideoFilename($newVideoFilename);
+                $entityManager->persist($video_db);
+                $entityManager->flush();
+
+                return $this->redirectToRoute('post_show', [
+                    'slug' => $post_name
+                ]);
             }
-
-            $video_db->setVideoFilename($newVideoFilename);
-
-            $entityManager->persist($video_db);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('post_show', [
-                'id' => $video_db->getIdPost()
-            ]);
 
         }
 
-        return $this->render('new.html.twig', array(
+        return $this->render('editVideo.html.twig', array(
             'form' => $form->createView(),
         ));
     }
@@ -447,8 +519,18 @@ class PostController extends AbstractController
         );
         if ($videos) {
             foreach($videos as $video){
-                unlink($this->getParameter('videos_directory').'/'.$video->getVideoFilename());
                 $entityManager->remove($video);
+                $entityManager->flush();
+            }
+        }
+
+        $comments = $entityManager->getRepository(Comment::class)->findBy(
+            ['id_post' => $id],
+            ['id' => 'ASC']
+        );
+        if ($comments) {
+            foreach($comments as $comment){
+                $entityManager->remove($comment);
                 $entityManager->flush();
             }
         }
@@ -473,7 +555,7 @@ class PostController extends AbstractController
 
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access the admin dashboard.')]
     #[Route('/picture/delete/{id}', name: 'picture_delete')]
-    public function deletePicture(int $id, EntityManagerInterface $entityManager): Response
+    public function deletePicture(int $id, EntityManagerInterface $entityManager, Request $request): Response
     {
         $picture = $entityManager->getRepository(Picture_post::class)->find($id);
 
@@ -483,21 +565,21 @@ class PostController extends AbstractController
             );
         }
 
-        $id_post = $picture->getIdPost();
+        $post_name = $request->get('postname', 'vide');
 
         unlink($this->getParameter('pictures_directory').'/'.$picture->getPictureFilename());
 
         $entityManager->remove($picture);
         $entityManager->flush();
 
-        return $this->redirectToRoute('post_edit', [
-            'id' => intval($id_post)
+        return $this->redirectToRoute('post_show', [
+            'slug' => $post_name
         ]);
     }
 
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access the admin dashboard.')]
     #[Route('/video/delete/{id}', name: 'video_delete')]
-    public function deleteVideo(int $id, EntityManagerInterface $entityManager): Response
+    public function deleteVideo(int $id, EntityManagerInterface $entityManager, Request $request): Response
     {
         $video = $entityManager->getRepository(Video_post::class)->find($id);
 
@@ -507,15 +589,39 @@ class PostController extends AbstractController
             );
         }
 
-        $id_post = $video->getIdPost();
-
-        unlink($this->getParameter('videos_directory').'/'.$video->getVideoFilename());
+        $post_name = $request->get('postname', 'vide');
 
         $entityManager->remove($video);
         $entityManager->flush();
 
-        return $this->redirectToRoute('post_edit', [
-            'id' => $id_post
+        return $this->redirectToRoute('post_show', [
+            'slug' => $post_name
         ]);
+    }
+
+    #[IsGranted('ROLE_USER', message: 'You are not allowed to access the admin dashboard.')]
+    #[Route('/delete', name: 'delete_choice')]
+    public function deleteChoice(EntityManagerInterface $entityManager, Request $request): Response
+    {
+        $post_name = $request->get('postname', 'vide');
+
+        $post_id = $request->get('postid', 'vide');
+
+        $picture_id = $request->get('pictureid', 'vide');
+
+        $video_id = $request->get('videoid', 'vide');
+
+        $redirection = $request->get('redirection', 'vide');
+
+        $choice = $request->get('choice', 'vide');
+
+        return $this->render('delete.html.twig', array(
+            'post_name' => $post_name,
+            'post_id' => $post_id,
+            'picture_id' => $picture_id,
+            'video_id' => $video_id,
+            'redirection' => $redirection,
+            'choice' => $choice
+        ));
     }
 }

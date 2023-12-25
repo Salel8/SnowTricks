@@ -1,6 +1,6 @@
 #logo_modify_delete{
     position: absolute;
-    top: 10%;
+    top: 30%;
     right: 5%;
     display: flex;
     flex-direction: row;
@@ -34,6 +34,7 @@ img{
 img:first-child{
     width: 100%;
     height: 500px;
+    margin-bottom: 7%;
 }
 
 video{
@@ -45,6 +46,7 @@ video{
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    margin-top: 10%;
 }
 
 .conteneur_ajout_commentaire{
@@ -114,6 +116,10 @@ form div:last-child{
     height : 50px;
 }
 
+form div:last-child{
+    display: none;
+}
+
 
 @media all and (max-width : 767px) {
     .conteneur_ensemble_image_video{
@@ -123,10 +129,12 @@ form div:last-child{
 
     img{
         width: 80%;
+        margin-bottom: 5%;
     }
 
-    video{
+    iframe{
         width: 80%;
+        margin-bottom: 5%;
     }
     
     img:first-child{

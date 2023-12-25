@@ -1,5 +1,8 @@
 .logo_modify_delete{
     background-color: white;
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
 }
 
 .logo_modify_delete a{
@@ -9,7 +12,7 @@
 
 .conteneur_ensemble_image_video div:first-child .logo_modify_delete{
     position: absolute;
-    top: 10%;
+    top: 30%;
     right: 5%;
     display: flex;
     flex-direction: row;
@@ -45,23 +48,33 @@
 }
 
 img{
-    width: 15%;
+    width: 100%;
     object-fit: cover;
+    margin-top : 10%;
 }
 
-img:first-child{
+.conteneur_ensemble_image_video div:first-child img{
     width: 100%;
     height: 500px;
+    margin-top: 0%;
 }
 
 .conteneur_image_logo{
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
+    align-items: center;
+    width: 20%;
 }
 
-video{
-    width: 15%;
+.conteneur_ensemble_image_video div:first-child{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+iframe{
+    margin-top: 10%;
 }
 
 .conteneur_information{
@@ -135,5 +148,9 @@ form div label{
         right: 12%;
         top: 3%;
         width: 8%;
+    }
+
+    .conteneur_image_logo{
+        width: 100%;
     }
 }

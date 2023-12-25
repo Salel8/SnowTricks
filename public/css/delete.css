@@ -1,0 +1,28 @@
+.titre{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-top: 100px;
+}
+
+.choix{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    margin-bottom: 10%;
+}
+
+.choix a{
+    color: blue;
+    background-color: gainsboro;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 1%;
+}
+
+
+@media all and (max-width : 767px) {
+    
+}

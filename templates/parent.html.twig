@@ -1,0 +1,24 @@
+{# /templates/parent.html.twig #}
+<html>
+    <head>
+    <title>{% block titre %}Parent{% endblock%}</title>
+    {% block stylesheets %}
+        <link rel="stylesheet" href="styles.css" type="text/css" media="all" />
+    {% endblock %}
+    </head>
+    <body>
+        {% block menu %}
+            <div>
+                <a href="{{ path('all_posts') }}"><p>Accueil</p></a>
+                <a href="{{ path('app_login') }}"><p>Se connecter</p></a>
+                <a href="{{ path('page_add_user') }}"><p>S'enregistrer</p></a>
+            </div>
+        {% endblock %}
+        {% block contenuPrincipal %}
+            Contenu du body
+        {% endblock %}
+        {% block javascripts %}
+                <script src="https://kit.fontawesome.com/ae436d2433.js" crossorigin="anonymous"></script>
+      {% endblock %}
+    </body>
+</html>

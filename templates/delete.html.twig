@@ -1,0 +1,61 @@
+{# templates/delete.html.twig #}
+{% extends 'base.html.twig' %}
+
+{# ... #}
+
+{% block title %}Page d'Accueil{% endblock%}
+
+{% block stylesheets %}
+    <link href="{{ asset('css/delete.css') }}" rel="stylesheet"/>
+    {{ parent() }}
+{% endblock%}
+
+{% block menu %}
+    {{ parent() }}
+{% endblock%}
+
+{% block body %}
+
+    {% if choice=='post'%}
+    <div class="titre">
+        <h1>Êtes vous sur de vouloir supprimer ce post ?</h1>
+    </div>
+    <div class="choix">
+        <a href="{{ path('all_posts') }}">Non</a>
+        <a href="{{ path('post_delete', {id: post_id}) }}">Oui</a>
+    </div>
+    {% endif %}
+
+    {% if choice=='picture'%}
+    <div class="titre">
+        <h1>Êtes vous sur de vouloir supprimer cette image ?</h1>
+    </div>
+    <div class="choix">
+        {#<a href="{{ path('post_edit', {id: post_id}) }}">Non</a>#}
+        {#<a href="{{ path('picture_delete', {id: picture_id}) }}">Oui</a>#}
+        <a href="/post/edit/{{post_name}}">Non</a>
+        <a href="/picture/delete/{{picture_id}}?postid={{ post_id }}">Oui</a>
+    </div>
+    {% endif %}
+
+    {% if choice=='video'%}
+    <div class="titre">
+        <h1>Êtes vous sur de vouloir supprimer cette vidéo ?</h1>
+    </div>
+    <div class="choix">
+        {#<a href="{{ path('post_edit', {id: post_id}) }}">Non</a>#}
+        {#<a href="{{ path('video_delete', {id: video_id}) }}">Oui</a>#}
+        <a href="/post/edit/{{post_name}}">Non</a>
+        <a href="/video/delete/{{video_id}}?postid={{ post_id }}">Oui</a>
+    </div>
+    {% endif %}
+    
+{% endblock %}
+
+{% block footer %}
+    {{ parent() }}
+{% endblock%}
+
+{% block javascripts %}
+{{ parent() }}
+{% endblock %}
