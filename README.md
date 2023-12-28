@@ -37,12 +37,6 @@ Veillez à bien modifier les champs "driver", "dbname", le port, "user", "passwo
 
 Cette configuration étant établie, vous pouvez dorénavant profiter pleinement de l'ensemble du projet.
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
-
-```bash
-pip install foobar
-```
-
 ## Démarrage
 
 Pour lancer le projet, il faut commencer par installer toutes les dépendances du projet. Pour cela, lancez le serveur PHP puis, via le terminal, placez-vous dans le dossier créé plus tôt contenant le code du projet. Puis lancez la commande :
