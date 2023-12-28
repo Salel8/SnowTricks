@@ -14,10 +14,10 @@ Base de données MySQL
 
 ## Installation
 
-Appuyez sur le bouton "Code" en vert, situé en haut de cette page. Choisissez entre HTTPS et SSH et copiez le nom du clone qui s'affiche. Créez un dossier où vous placerez le code du projet et ouvrez une fenêtre du terminal. Placez-vous dans ce dossier créé et clonez alors ce repository avec la commande git clone.
+Appuyez sur le bouton "Code" en vert, situé en haut de cette page. Choisissez entre HTTPS et SSH et copiez le nom du clone qui s'affiche. Créez un dossier où vous placerez le code du projet et ouvrez une fenêtre du terminal. Placez-vous dans ce dossier créé et clonez alors ce repository avec la commande git clone :
 
 ```bash
-git clone git@github.com:Salel8/Snowtricks.git
+git clone git@github.com:Salel8/SnowTricks.git
 ```
 
 Vous avez maintenant tout le projet en local mais avant de pouvoir l'utiliser, il vous faut créer votre base de données. Vous pouvez utiliser PHPMyAdmin pour créer votre base de données ou bien utiliser le jeu de données fourni dans le dossier data. Pour importer le jeu de données, rendez-vous dans la section "Importer" de PHPMyAdmin, sélectionnez le fichier "snowtricks.sql" et appuyer sur "Exécuter".
@@ -34,6 +34,12 @@ HOST="host"
 ```
 
 Veillez à bien modifier les champs "driver", "dbname", le port, "user", "password" et "host" avec ceux correspondant à votre base de données. Si vous avez importé la base de données, son nom devrait être "snowtricks". En local, souvent, le port est 8889.
+
+Ensuite, il vous faut régler le mailer dsn dans le fichier .env.local, ce qui vous permettra d'envoyer des emails. 
+
+```php
+MAILER_DSN="mailerdsn"
+```
 
 Cette configuration étant établie, vous pouvez dorénavant profiter pleinement de l'ensemble du projet.
 
