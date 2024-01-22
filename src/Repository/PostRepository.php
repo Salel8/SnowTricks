@@ -59,5 +59,12 @@ class PostRepository extends ServiceEntityRepository
         // to get just one result:
         // $product = $query->setMaxResults(1)->getOneOrNullResult();
     }
+
+    public function findAllForPagination() {
+        $qb = $this->createQueryBuilder('u')
+            ->from('App\Entity\Post', 'p')
+            ->select('p');
+        return $qb->getQuery()->getResult();
+    }
 }
 

@@ -17,7 +17,7 @@ use App\Form\VideoType;
 use App\Entity\Picture_post;
 use App\Form\PictureType;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use App\Controller\CommentController;
+//use App\Controller\CommentController;
 use App\Entity\Comment;
 use App\Repository\PostRepository;
 use App\Form\CommentType;
@@ -28,12 +28,18 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Notifier\Notification\Notification;
 use Symfony\Component\Notifier\NotifierInterface;
+use App\Service\MailEnvoi;
+use App\Controller\CommentController;
+use App\Repository\CommentRepository;
+use Knp\Component\Pager\PaginatorInterface;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use App\Service\FileUploader;
 
 class PostController extends AbstractController
 {
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access the admin dashboard.')]
     #[Route('/posts/new', name: 'page_add_post')]
-    public function new(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger, ValidatorInterface $validator, NotifierInterface $notifier): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger, ValidatorInterface $validator, NotifierInterface $notifier, FileUploader $fileUploader): Response
     {
         $post = new Post();
 
@@ -61,7 +67,7 @@ class PostController extends AbstractController
                 // this condition is needed because the 'picture' field is not required
                 // so the PDF file must be processed only when a file is uploaded
                 if ($pictureFile) {
-                    $originalPictureFilename = pathinfo($pictureFile->getClientOriginalName(), PATHINFO_FILENAME);
+                    /*$originalPictureFilename = pathinfo($pictureFile->getClientOriginalName(), PATHINFO_FILENAME);
                     // this is needed to safely include the file name as part of the URL
                     $safePictureFilename = $slugger->slug($originalPictureFilename);
                     $newPictureFilename = $safePictureFilename.'-'.uniqid().'.'.$pictureFile->guessExtension();
@@ -88,7 +94,9 @@ class PostController extends AbstractController
                     }
 
                     $entityManager->persist($picture);
-                    $entityManager->flush();
+                    $entityManager->flush();*/
+
+                    $fileUploader->uploadPicture($post, $pictureFile, $entityManager, $slugger, $validator);
                 }
             }
 
@@ -96,7 +104,7 @@ class PostController extends AbstractController
             $videoFiles = $form->get('video')->getData();
 
             if ($videoFiles) {
-                $video = new Video_post();
+                /*$video = new Video_post();
                 $video->setVideoFilename($videoFiles);
                 $video->setIdPost($post);
 
@@ -105,7 +113,9 @@ class PostController extends AbstractController
                     return new Response((string) $errors, 400);
                 }
                 $entityManager->persist($video);
-                $entityManager->flush();
+                $entityManager->flush();*/
+                $fileUploader->uploadVideo($videoFiles, $post, $entityManager, $validator);
+
             }
 
             return $this->redirectToRoute('all_posts');
@@ -119,30 +129,57 @@ class PostController extends AbstractController
         }
 
 
+    #[Route('/lu', name: 'post_lu')]
+    public function number(MailerInterface $mailer, MailEnvoi $mailEnvoi): Response
+    {
+        $number = random_int(0, 100);
+        $to = 'sam-77@hotmail.fr';
+        $htmlText = '<p>See Twig integration for better HTML integration! with</p><p>http://localhost:8000/validation/'.$number.'</p>'.$number;
+        $mailEnvoi->sendemail($to, $htmlText, $mailer);
+
+        return $this->render('post.html.twig', [
+            //'number' => $number,
+        ]);
+    }
+
+
 
     #[Route('/posts', name: 'all_posts')]
-    public function getLastPosts(EntityManagerInterface $entityManager, Request $request): Response
+    public function getLastPosts(EntityManagerInterface $entityManager, Request $request, PaginatorInterface $paginator, PostRepository $postRepository): Response
     {
-        $page = $request->get('page', 1);
-        $limit = $request->get('limit', 8);
+        /*$page = $request->get('page', 1);
+        $limit = $request->get('limit', 8);*/
 
-        $qb = $entityManager->createQueryBuilder()
+        /*$qb = $entityManager->createQueryBuilder()
             ->from('App\Entity\Post', 'p')
-            ->select('p')
+            ->select('p');*/
             //->setParameter('val', $id)
             //->andwhere('p.id = :val')
-            ->setFirstResult(($page - 1) * $limit)
-            ->setMaxResults($limit);
+            /*->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);*/
 
-        $posts = $qb->getQuery()->getResult();
+        /*$qb = $entityManager->createQueryBuilder()
+            ->from('App\Entity\Post', 'p')
+            ->select('p');
 
-        $nbposts = count($entityManager->getRepository(Post::class)->findAll());
+        $posts = $qb->getQuery()->getResult();*/
+
+        $posts = $postRepository->findAllForPagination();
+
+
+        $pagination = $paginator->paginate(
+            $posts,
+            $request->query->get('page', 1),
+            8
+        );
+
+        /*$nbposts = count($entityManager->getRepository(Post::class)->findAll());
 
         if (($nbposts % $limit) > 0){
             $nbpage = intdiv($nbposts, $limit) + 1;
         } else{
             $nbpage = intdiv($nbposts, $limit);
-        }
+        }*/
 
         $pictures=[];
         foreach ($posts as $post) {
@@ -155,13 +192,14 @@ class PostController extends AbstractController
         return $this->render('accueil.html.twig', [
             'posts' => $posts,
             'pictures' => $pictures,
-            'page' => $page,
-            'nbpage' => $nbpage,
+            //'page' => $page,
+            //'nbpage' => $nbpage,
+            'pagination' => $pagination,
         ]);
     }
 
     #[Route('/post/{slug}', name: 'post_show')]
-    public function show(string $slug, EntityManagerInterface $entityManager, Request $request, ValidatorInterface $validator): Response
+    public function show(string $slug, EntityManagerInterface $entityManager, Request $request, ValidatorInterface $validator, CommentController $commentController, PaginatorInterface $paginator, CommentRepository $commentRepository): Response
     {
         $post = $entityManager->getRepository(Post::class)->findOneBy(['name' => $slug]);
 
@@ -182,7 +220,7 @@ class PostController extends AbstractController
         );
 
 
-        $comment = new Comment();
+        /*$comment = new Comment();
 
         $form = $this->createForm(CommentType::class, $comment);
 
@@ -200,12 +238,24 @@ class PostController extends AbstractController
 
             $entityManager->persist($comment);
             $entityManager->flush();
-        }
+        }*/
 
-        $page = $request->get('page', 1);
-        $limit = $request->get('limit', 2);
+        $form = $commentController->newComment($post, $request, $entityManager, $validator);
 
-        $qb = $entityManager->createQueryBuilder()
+        /*$form = $this->forward('App\Controller\CommentController::newComment', [
+            'post'  => $post,
+            'request' => $request,
+            'entityManager'  => $entityManager,
+            'validator' => $validator,
+        ]);*/
+        //$form = $form->getForm();
+
+        //$commentController->newComment($post, $request, $entityManager, $validator);
+
+        /*$page = $request->get('page', 1);
+        $limit = $request->get('limit', 2);*/
+
+        /*$qb = $entityManager->createQueryBuilder()
             ->from('App\Entity\Comment', 'c')
             ->select('c')
             ->setParameter('val', $post->getId())
@@ -213,15 +263,29 @@ class PostController extends AbstractController
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit);
 
-        $comments = $qb->getQuery()->getResult();
+        $comments = $qb->getQuery()->getResult();*/
 
-        if ((count($post->getComments()) % $limit) > 0){
+        //$comments = $commentController->getLastCommentsWithPagination($post, $page, $limit, $entityManager);
+        $comments = $commentRepository->findAllForPagination($post);
+
+        $pagination = $paginator->paginate(
+            $comments,
+            $request->query->get('page', 1),
+            2
+        );
+        /*$pager = new sfPropelPager('Comment', 10);
+        $pager->setCriteria($comments);
+        $pager->setPage($this->getRequestParameter('page', 1));
+        $pager->init();
+        $this->pager = $pager;*/
+
+        /*if ((count($post->getComments()) % $limit) > 0){
             $nbpage = intdiv(count($post->getComments()), $limit) + 1;
         } else{
             $nbpage = intdiv(count($post->getComments()), $limit);
-        }
+        }*/
 
-        function get_gravatar_url( $email ) {
+        /*function get_gravatar_url( $email ) {
             // Trim leading and trailing whitespace from
             // an email address and force all characters
             // to lower case
@@ -237,7 +301,11 @@ class PostController extends AbstractController
         $gravatar=[];
         foreach($comments as $comment){
             $gravatar[$comment->getId()] = get_gravatar_url( $comment->getEmail() );
-        }    
+        }*/    
+        $gravatar=[];
+        foreach($comments as $comment){
+            $gravatar[$comment->getId()] = $commentController->get_gravatar_url( $comment->getEmail() );
+        }
        
 
         $date = new \DateTime();
@@ -251,16 +319,17 @@ class PostController extends AbstractController
             'videos' => $videos,
             'comments' => $comments,
             'form' => $form->createView(),
-            'page' => $page,
-            'nbpage' => $nbpage,
+            //'page' => $page,
+            //'nbpage' => $nbpage,
             'gravatar' => $gravatar,
             'date_jour' => $date_jour,
+            'pagination' => $pagination,
         ]);
     }
 
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access the admin dashboard.')]
     #[Route('/post/edit/{slug}', name: 'post_edit')]
-    public function update(string $slug, Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger, ValidatorInterface $validator): Response
+    public function update(string $slug, Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger, ValidatorInterface $validator, NotifierInterface $notifier, FileUploader $fileUploader): Response
     {
         $post_db = $entityManager->getRepository(Post::class)->findOneBy(['name' => $slug]);
         $pictures_db = $entityManager->getRepository(Picture_post::class)->findBy(
@@ -308,7 +377,7 @@ class PostController extends AbstractController
                 // this condition is needed because the 'picture' field is not required
                 // so the PDF file must be processed only when a file is uploaded
                 if ($pictureFile) {
-                    $originalPictureFilename = pathinfo($pictureFile->getClientOriginalName(), PATHINFO_FILENAME);
+                    /*$originalPictureFilename = pathinfo($pictureFile->getClientOriginalName(), PATHINFO_FILENAME);
                     // this is needed to safely include the file name as part of the URL
                     $safePictureFilename = $slugger->slug($originalPictureFilename);
                     $newPictureFilename = $safePictureFilename.'-'.uniqid().'.'.$pictureFile->guessExtension();
@@ -335,7 +404,8 @@ class PostController extends AbstractController
                     }
 
                     $entityManager->persist($picture);
-                    $entityManager->flush();
+                    $entityManager->flush();*/
+                    $fileUploader->uploadPicture($post_db, $pictureFile, $entityManager, $slugger, $validator);
                 }
             }
 
@@ -343,7 +413,7 @@ class PostController extends AbstractController
             $videoFiles = $form->get('video')->getData();
 
             if ($videoFiles) {
-                $video = new Video_post();
+                /*$video = new Video_post();
                 $video->setVideoFilename($videoFiles);
                 $video->setIdPost($post_db);
 
@@ -352,8 +422,11 @@ class PostController extends AbstractController
                     return new Response((string) $errors, 400);
                 }
                 $entityManager->persist($video);
-                $entityManager->flush();
+                $entityManager->flush();*/
+                $fileUploader->uploadVideo($videoFiles, $post, $entityManager, $validator);
             }
+
+            $notifier->send(new Notification('Vous avez modifié votre article.', ['browser']));
 
 
             return $this->redirectToRoute('post_show', [
@@ -372,7 +445,7 @@ class PostController extends AbstractController
 
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access the admin dashboard.')]
     #[Route('/picture/edit/{id}', name: 'picture_edit')]
-    public function updatePicture(int $id, Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger, ValidatorInterface $validator): Response
+    public function updatePicture(int $id, Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger, ValidatorInterface $validator, FileUploader $fileUploader): Response
     {
         $picture_db = $entityManager->getRepository(Picture_post::class)->find($id);
 
@@ -402,7 +475,7 @@ class PostController extends AbstractController
             // this condition is needed because the 'video' field is not required
             // so the PDF file must be processed only when a file is uploaded
             if ($pictureFile) {
-                $originalPictureFilename = pathinfo($pictureFile->getClientOriginalName(), PATHINFO_FILENAME);
+                /*$originalPictureFilename = pathinfo($pictureFile->getClientOriginalName(), PATHINFO_FILENAME);
                 // this is needed to safely include the file name as part of the URL
                 $safePictureFilename = $slugger->slug($originalPictureFilename);
                 $newPictureFilename = $safePictureFilename.'-'.uniqid().'.'.$pictureFile->guessExtension();
@@ -419,10 +492,11 @@ class PostController extends AbstractController
 
                 // updates the 'videoFilename' property to store the PDF file name
                 // instead of its contents
-                $picture->setPictureFilename($newPictureFilename);
+                $picture->setPictureFilename($newPictureFilename);*/
+                $fileUploader->editPicture($picture_db, $pictureFile, $entityManager, $slugger, $validator);
             }
 
-            $picture_db->setPictureFilename($newPictureFilename);
+            /*$picture_db->setPictureFilename($newPictureFilename);
 
             $errors = $validator->validate($picture_db);
             if (count($errors) > 0) {
@@ -430,7 +504,7 @@ class PostController extends AbstractController
             }
 
             $entityManager->persist($picture_db);
-            $entityManager->flush();
+            $entityManager->flush();*/
 
     
             return $this->redirectToRoute('post_edit', [
@@ -446,7 +520,7 @@ class PostController extends AbstractController
 
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access the admin dashboard.')]
     #[Route('/video/edit/{id}', name: 'video_edit')]
-    public function updateVideo(int $id, Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
+    public function updateVideo(int $id, Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator, FileUploader $fileUploader): Response
     {
         $video_db = $entityManager->getRepository(Video_post::class)->find($id);
 
@@ -475,7 +549,7 @@ class PostController extends AbstractController
             // so the PDF file must be processed only when a file is uploaded
             if ($videoFile) {
                 
-                $video_db->setVideoFilename($videoFile);
+                /*$video_db->setVideoFilename($videoFile);
 
                 $errors = $validator->validate($video_db);
                 if (count($errors) > 0) {
@@ -483,7 +557,9 @@ class PostController extends AbstractController
                 }
 
                 $entityManager->persist($video_db);
-                $entityManager->flush();
+                $entityManager->flush();*/
+
+                $fileUploader->editVideo($video_db, $videoFile, $entityManager, $validator);
 
                 return $this->redirectToRoute('post_show', [
                     'slug' => $post_name
@@ -499,7 +575,7 @@ class PostController extends AbstractController
 
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access the admin dashboard.')]
     #[Route('/post/delete/{id}', name: 'post_delete')]
-    public function delete(int $id, EntityManagerInterface $entityManager): Response
+    public function delete(int $id, EntityManagerInterface $entityManager, CommentController $commentController, NotifierInterface $notifier, FileUploader $fileUploader): Response
     {
         $pictures = $entityManager->getRepository(Picture_post::class)->findBy(
             ['id_post' => $id],
@@ -508,8 +584,9 @@ class PostController extends AbstractController
         if ($pictures) {
             foreach($pictures as $picture){
                 unlink($this->getParameter('pictures_directory').'/'.$picture->getPictureFilename());
-                $entityManager->remove($picture);
-                $entityManager->flush();
+                /*$entityManager->remove($picture);
+                $entityManager->flush();*/
+                $fileUploader->deleteFile($picture, $entityManager);
             }
         }
 
@@ -519,12 +596,13 @@ class PostController extends AbstractController
         );
         if ($videos) {
             foreach($videos as $video){
-                $entityManager->remove($video);
-                $entityManager->flush();
+                /*$entityManager->remove($video);
+                $entityManager->flush();*/
+                $fileUploader->deleteFile($video, $entityManager);
             }
         }
 
-        $comments = $entityManager->getRepository(Comment::class)->findBy(
+        /*$comments = $entityManager->getRepository(Comment::class)->findBy(
             ['id_post' => $id],
             ['id' => 'ASC']
         );
@@ -533,7 +611,13 @@ class PostController extends AbstractController
                 $entityManager->remove($comment);
                 $entityManager->flush();
             }
-        }
+        }*/
+
+        $commentController->deleteComment($id, $entityManager);
+
+        /*$form = $this->forward('App\Controller\CommentController::deleteComment', [
+            'id'  => $id,
+        ]);*/
 
 
         $post = $entityManager->getRepository(Post::class)->find($id);
@@ -547,7 +631,7 @@ class PostController extends AbstractController
         $entityManager->remove($post);
         $entityManager->flush();
 
-
+        $notifier->send(new Notification("Vous avez supprimé l'article.", ['browser']));
         
 
         return $this->redirectToRoute('all_posts');
@@ -555,7 +639,7 @@ class PostController extends AbstractController
 
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access the admin dashboard.')]
     #[Route('/picture/delete/{id}', name: 'picture_delete')]
-    public function deletePicture(int $id, EntityManagerInterface $entityManager, Request $request): Response
+    public function deletePicture(int $id, EntityManagerInterface $entityManager, Request $request, FileUploader $fileUploader): Response
     {
         $picture = $entityManager->getRepository(Picture_post::class)->find($id);
 
@@ -569,8 +653,9 @@ class PostController extends AbstractController
 
         unlink($this->getParameter('pictures_directory').'/'.$picture->getPictureFilename());
 
-        $entityManager->remove($picture);
-        $entityManager->flush();
+        //$entityManager->remove($picture);
+        //$entityManager->flush();
+        $fileUploader->deleteFile($picture, $entityManager);
 
         return $this->redirectToRoute('post_show', [
             'slug' => $post_name
@@ -579,7 +664,7 @@ class PostController extends AbstractController
 
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access the admin dashboard.')]
     #[Route('/video/delete/{id}', name: 'video_delete')]
-    public function deleteVideo(int $id, EntityManagerInterface $entityManager, Request $request): Response
+    public function deleteVideo(int $id, EntityManagerInterface $entityManager, Request $request, FileUploader $fileUploader): Response
     {
         $video = $entityManager->getRepository(Video_post::class)->find($id);
 
@@ -591,8 +676,9 @@ class PostController extends AbstractController
 
         $post_name = $request->get('postname', 'vide');
 
-        $entityManager->remove($video);
-        $entityManager->flush();
+        /*$entityManager->remove($video);
+        $entityManager->flush();*/
+        $fileUploader->deleteFile($video, $entityManager);
 
         return $this->redirectToRoute('post_show', [
             'slug' => $post_name

@@ -77,12 +77,19 @@ label{
 .pagination{
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: space-between;
+    width: 7%;
 }
 
 .pagination a{
     text-decoration: none;
     color: blue;
+}
+
+#bloc_pagination{
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #comment_date{
@@ -118,6 +125,17 @@ form div:last-child{
 
 form div:last-child{
     display: none;
+}
+
+#message_flash{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    background-color: greenyellow;
+    width: 50%;
+    margin-bottom: 6%;
+    color: green;
 }
 
 

@@ -3,8 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\Comment;
-use Doctrine\Common\Persistence\ManagerRegistry;
+//use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+
+use Doctrine\Persistence\ManagerRegistry;
 
 class CommentRepository extends ServiceEntityRepository
 {
@@ -32,6 +34,15 @@ class CommentRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('b')
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit);
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findAllForPagination($post) {
+        $qb = $this->createQueryBuilder('b')
+            ->from('App\Entity\Comment', 'c')
+            ->select('c')
+            ->setParameter('val', $post->getId())
+            ->andwhere('c.id_post = :val');
         return $qb->getQuery()->getResult();
     }
 }

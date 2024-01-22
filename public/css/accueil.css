@@ -48,12 +48,19 @@ img{
 .pagination{
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: space-between;
+    width: 12%;
 }
 
 .pagination a{
     text-decoration: none;
     color: blue;
+}
+
+#bloc_pagination{
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #message_flash{

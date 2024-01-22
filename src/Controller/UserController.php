@@ -22,11 +22,12 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 //use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
+use App\Service\MailEnvoi;
 
 class UserController extends AbstractController
 {
     #[Route('/register', name: 'page_add_user')]
-    public function register(Request $request, EntityManagerInterface $entityManager,UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer/*, SluggerInterface $slugger*/): Response
+    public function register(Request $request, EntityManagerInterface $entityManager,UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer, MailEnvoi $mailEnvoi): Response
     {
         $user = new User();
         //$user->setUsername('Sam');
@@ -55,8 +56,12 @@ class UserController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
+            $to = $user->getEmail();
+            $htmlText = '<p>See Twig integration for better HTML integration!</p><p>http://localhost:8000/validation/'.$token_inscription.'</p>';
+            $mailEnvoi->sendemail($to, $htmlText, $mailer);
+
             //on envoie un mail de confirmation
-            $email = (new Email())
+            /*$email = (new Email())
                 ->from('mehal.samir@hotmail.fr')
                 ->to($user->getEmail())
                 //->cc('cc@example.com')
@@ -67,7 +72,7 @@ class UserController extends AbstractController
                 ->text('Sending emails is fun again!')
                 ->html('<p>See Twig integration for better HTML integration!</p><p>http://localhost:8000/validation/'.$token_inscription.'</p>');
 
-            $mailer->send($email);
+            $mailer->send($email);*/
 
             return $this->redirectToRoute('app_login');
         }
@@ -139,7 +144,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/password/forget', name: 'forget_password')]
-    public function forgetPassword(Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
+    public function forgetPassword(Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer, MailEnvoi $mailEnvoi): Response
     {
         $user = new User();
 
@@ -163,10 +168,19 @@ class UserController extends AbstractController
             $entityManager->persist($user_db);
             $entityManager->flush();
 
+            $to = $user_db->getEmail();
+            $htmlText = '<p>See Twig integration for better HTML integration!</p><p>http://localhost:8000/password/reinitialisation/'.$token_forget.'</p>';
+            $mailEnvoi->sendemail($to, $htmlText, $mailer);
+
+            //$number = random_int(0, 100);
+            //$to = 'sam-77@hotmail.fr';
+            //$htmlText = '<p>See Twig integration for better HTML integration! with</p><p>http://localhost:8000/validation/'.$number.'</p>'.$number;
+            //$mailEnvoi->sendemail($to, $htmlText, $mailer);
+
             //on envoie un mail de réinitialisation
-            $email = (new Email())
+            /*$email = (new Email())
                 ->from('mehal.samir@hotmail.fr')
-                ->to($user_db->getEmail())
+                ->to(strval($user_db->getEmail()))
                 //->cc('cc@example.com')
                 //->bcc('bcc@example.com')
                 //->replyTo('fabien@example.com')
@@ -175,7 +189,7 @@ class UserController extends AbstractController
                 ->text('Sending emails is fun again!')
                 ->html('<p>See Twig integration for better HTML integration!</p><p>http://localhost:8000/password/reinitialisation/'.$token_forget.'</p>');
 
-            $mailer->send($email);
+            $mailer->send($email);*/
         }
 
         

@@ -30,7 +30,7 @@
     <div id="conteneur_ensemble_figure">
         {% if posts is defined %}
             {#mettre l'ensemble des figures#}
-            {% for post in posts %}
+            {% for post in pagination %}
             <div class="conteneur_figure">
                 <div>
                     {% if pictures[post.id] is defined %}
@@ -51,20 +51,23 @@
             {% endfor %}
         {% endif %}
     </div>
-    <div class="pagination">
-        {% if page > 2 %}
-            <a href="/posts?page=1"><p> < .&nbsp;</p></a>
-        {% endif %}
-        {% if page > 1 %}
-            <a href="/posts?page={{ page - 1 }}"><p>&nbsp;{{ page - 1 }} .&nbsp;</p></a>
-        {% endif %}
-        <p> {{ page }} </p>
-        {% if nbpage > page %}
-            <a href="/posts?page={{ page + 1 }}"><p>&nbsp;. {{ page + 1 }}&nbsp;</p></a>
-        {% endif %}
-        {% if nbpage > page + 1 %}
-            <a href="/posts?page={{ nbpage }}"><p>&nbsp;. > </p></a>
-        {% endif %}
+    {#<div class="pagination">#}
+        {#{% if page > 2 %}#}
+            {#<a href="/posts?page=1"><p> < .&nbsp;</p></a>#}
+        {#{% endif %}#}
+        {#{% if page > 1 %}#}
+            {#<a href="/posts?page={{ page - 1 }}"><p>&nbsp;{{ page - 1 }} .&nbsp;</p></a>#}
+        {#{% endif %}#}
+        {#<p> {{ page }} </p>#}
+        {#{% if nbpage > page %}#}
+            {#<a href="/posts?page={{ page + 1 }}"><p>&nbsp;. {{ page + 1 }}&nbsp;</p></a>#}
+        {#{% endif %}#}
+        {#{% if nbpage > page + 1 %}#}
+            {#<a href="/posts?page={{ nbpage }}"><p>&nbsp;. > </p></a>#}
+        {#{% endif %}#}
+    {#</div>#}
+    <div id="bloc_pagination">
+        {{ knp_pagination_render(pagination) }}
     </div>
     <div class="fleche">
         <a href="{{ path('all_posts') }}#conteneur_ensemble_figure"><i class="fa-solid fa-arrow-up"></i></a>
