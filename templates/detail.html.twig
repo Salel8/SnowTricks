@@ -37,6 +37,12 @@
             {% endfor %}
         {% endif %}
     </div>
+    <div id="message_flash">
+        {% for message in app.flashes('notification') %}
+            {{ message }}
+            {#<button type="button"><span aria-hidden="true">&times;</span></button>#}
+        {% endfor %}
+    </div>
     <div class="conteneur_information">
         <h2>{{post.name}}</h2>
         <p>{{post.description}}</p>
@@ -59,7 +65,7 @@
     <div class="conteneur_commentaires">
         <h2>Commentaires</h2>
             {#{% if comments is defined %}#}
-                {% for comment in comments %}
+                {% for comment in pagination %}
                     <div class="conteneur_photo_commentaire">
                         {#<p>{{ gravatar[comment.id] }}</p>#}
                         <img src={{ gravatar[comment.id] }} alt="aa" class="image_gravatar" />
@@ -73,20 +79,8 @@
             {#{% endif %}#}
     </div>
 
-    <div class="pagination">
-        {% if page > 2 %}
-            <a href="/post/{{post.id}}?page=1"><p> < .&nbsp;</p></a>
-        {% endif %}
-        {% if page > 1 %}
-            <a href="/post/{{post.id}}?page={{ page - 1 }}"><p>&nbsp;{{ page - 1 }} .&nbsp;</p></a>
-        {% endif %}
-        <p> {{ page }} </p>
-        {% if nbpage > page %}
-            <a href="/post/{{post.id}}?page={{ page + 1 }}"><p>&nbsp;. {{ page + 1 }}&nbsp;</p></a>
-        {% endif %}
-        {% if nbpage > page + 1 %}
-            <a href="/post/{{post.id}}?page={{ nbpage }}"><p>&nbsp;. > </p></a>
-        {% endif %}
+    <div id="bloc_pagination">
+        {{ knp_pagination_render(pagination) }}
     </div>
     
 {% endblock %}

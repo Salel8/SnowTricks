@@ -1,0 +1,14 @@
+#erreur{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+p{
+    margin-bottom: 20%;
+}
+
+h1{
+    color: red;
+}
