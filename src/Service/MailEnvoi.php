@@ -37,21 +37,6 @@ class MailEnvoi
 
     public function sendEmail($to, $htmlText, MailerInterface $mailer)
        {
-           /*$number = random_int(0, 100);
-
-           $email = (new Email())
-               ->from('mehal.samir@hotmail.fr')
-               ->to('sam-77@hotmail.fr')
-               //->cc('cc@example.com')
-               //->bcc('bcc@example.com')
-               //->replyTo('fabien@example.com')
-               //->priority(Email::PRIORITY_HIGH)
-               ->subject('Time for Symfony Mailer!')
-               ->text('Envoie message avec ')
-               ->html('<p>See Twig integration for better HTML integration! with</p><p>http://localhost:8000/validation/'.$number.'</p>'.$number);
-
-           $mailer->send($email);*/
-
            $email = (new Email())
                ->from('mehal.samir@hotmail.fr')
                ->to(strval($to))
@@ -70,11 +55,5 @@ class MailEnvoi
            } else {
                echo 'Le message a été envoyé.';
            }*/
-
-           /*return $this->render('post.html.twig', [
-               'number' => $number,
-           ]);*/
-
-           //return $number;
        }
 }

@@ -2,15 +2,6 @@
 //src/Service/FileUploader.php
 namespace App\Service;
 
-/*use Symfony\Component\HttpFoundation\File\Exception\FileException;
-//use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\String\Slugger\SluggerInterface;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-use App\Entity\Picture_post;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\File\File;*/
-
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -39,7 +30,6 @@ class FileUploader
 {
     public function __construct(
         private string $targetDirectory,
-        //private SluggerInterface $slugger,
     ) {
     }
 
@@ -52,10 +42,6 @@ class FileUploader
 
         // Move the file to the directory where pictures are stored
         try {
-            /*$pictureFile->move(
-                $this->getParameter('pictures_directory'),
-                $newPictureFilename
-            );*/
             $pictureFile->move($this->getTargetDirectory(), $newPictureFilename);
         } catch (FileException $e) {
             // ... handle exception if something happens during file upload
@@ -75,7 +61,6 @@ class FileUploader
         $entityManager->persist($picture);
         $entityManager->flush();
 
-        //return $fileName;
     }
 
     public function editPicture($picture_db, $pictureFile, EntityManagerInterface $entityManager, SluggerInterface $slugger, ValidatorInterface $validator)
@@ -87,20 +72,13 @@ class FileUploader
 
         // Move the file to the directory where pictures are stored
         try {
-            /*$pictureFile->move(
-                $this->getParameter('pictures_directory'),
-                $newPictureFilename
-            );*/
             $pictureFile->move($this->getTargetDirectory(), $newPictureFilename);
         } catch (FileException $e) {
             // ... handle exception if something happens during file upload
         }
 
-        //$picture = new Picture_post();
         // updates the 'pictureFilename' property to store the PDF file name
         // instead of its contents
-        //$picture->setPictureFilename($newPictureFilename);
-        //$picture->setIdPost($post);
         $picture_db->setPictureFilename($newPictureFilename);
 
         $errors = $validator->validate($picture_db);
@@ -111,7 +89,6 @@ class FileUploader
         $entityManager->persist($picture_db);
         $entityManager->flush();
 
-        //return $fileName;
     }
 
     public function getTargetDirectory(): string
@@ -135,9 +112,7 @@ class FileUploader
 
     public function editVideo($video_db, $videoFile, EntityManagerInterface $entityManager, ValidatorInterface $validator)
     {
-        //$video = new Video_post();
         $video_db->setVideoFilename($videoFile);
-        //$video->setIdPost($post);
 
         $errors = $validator->validate($video_db);
         if (count($errors) > 0) {

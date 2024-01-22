@@ -8,18 +8,12 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Form\UserType;
 use App\Entity\User;
-//use App\Repository\UserRepository;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Doctrine\ORM\EntityManagerInterface;
-//use App\Entity\Video_post;
-//use App\Form\VideoType;
-//use App\Entity\Picture_post;
-//use App\Form\PictureType;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-//use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use App\Service\MailEnvoi;
@@ -30,9 +24,6 @@ class UserController extends AbstractController
     public function register(Request $request, EntityManagerInterface $entityManager,UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer, MailEnvoi $mailEnvoi): Response
     {
         $user = new User();
-        //$user->setUsername('Sam');
-        //$user->setEmail('adresse mail');
-        //$user->setPassword('Mot de passe');
 
         $form = $this->createForm(UserType::class, $user);
 
@@ -60,20 +51,6 @@ class UserController extends AbstractController
             $htmlText = '<p>See Twig integration for better HTML integration!</p><p>http://localhost:8000/validation/'.$token_inscription.'</p>';
             $mailEnvoi->sendemail($to, $htmlText, $mailer);
 
-            //on envoie un mail de confirmation
-            /*$email = (new Email())
-                ->from('mehal.samir@hotmail.fr')
-                ->to($user->getEmail())
-                //->cc('cc@example.com')
-                //->bcc('bcc@example.com')
-                //->replyTo('fabien@example.com')
-                //->priority(Email::PRIORITY_HIGH)
-                ->subject('Valider votre inscription !')
-                ->text('Sending emails is fun again!')
-                ->html('<p>See Twig integration for better HTML integration!</p><p>http://localhost:8000/validation/'.$token_inscription.'</p>');
-
-            $mailer->send($email);*/
-
             return $this->redirectToRoute('app_login');
         }
 
@@ -89,7 +66,6 @@ class UserController extends AbstractController
 
         $roles[] = 'ROLE_USER';
         $user_db->setRoles($roles);
-        //$user_db->setToken(null);
 
         $entityManager->persist($user_db);
         $entityManager->flush();
@@ -118,10 +94,6 @@ class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            //$em = $this->getDoctrine()->getManager();
-            
-            //$name = $request->query->get('name');
-            //$password = $request->query->get('password');
 
             $user = $form->getData();
 
@@ -134,9 +106,6 @@ class UserController extends AbstractController
         }
         
 
-        /*return $this->render('user.html.twig', array(
-            'form' => $form->createView(),
-        ));*/
         return $this->render('login/login.html.twig', [
             'last_username' => $lastUsername,
             'error'         => $error,
@@ -153,11 +122,8 @@ class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            //$em = $this->getDoctrine()->getManager();
-            //$name = $request->query->get('name');
 
             $user = $form->getData();
-            //$username = $form->get('username')->getData();
 
             $repository = $entityManager->getRepository(User::class);
             $user_db = $repository->findOneBy(['username' => $user->getUsername()]);
@@ -172,24 +138,6 @@ class UserController extends AbstractController
             $htmlText = '<p>See Twig integration for better HTML integration!</p><p>http://localhost:8000/password/reinitialisation/'.$token_forget.'</p>';
             $mailEnvoi->sendemail($to, $htmlText, $mailer);
 
-            //$number = random_int(0, 100);
-            //$to = 'sam-77@hotmail.fr';
-            //$htmlText = '<p>See Twig integration for better HTML integration! with</p><p>http://localhost:8000/validation/'.$number.'</p>'.$number;
-            //$mailEnvoi->sendemail($to, $htmlText, $mailer);
-
-            //on envoie un mail de réinitialisation
-            /*$email = (new Email())
-                ->from('mehal.samir@hotmail.fr')
-                ->to(strval($user_db->getEmail()))
-                //->cc('cc@example.com')
-                //->bcc('bcc@example.com')
-                //->replyTo('fabien@example.com')
-                //->priority(Email::PRIORITY_HIGH)
-                ->subject('Time for Symfony Mailer!')
-                ->text('Sending emails is fun again!')
-                ->html('<p>See Twig integration for better HTML integration!</p><p>http://localhost:8000/password/reinitialisation/'.$token_forget.'</p>');
-
-            $mailer->send($email);*/
         }
 
         
@@ -203,8 +151,6 @@ class UserController extends AbstractController
     public function reinitialisationPassword(string $token, Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
         $user_db = $entityManager->getRepository(User::class)->findOneBy(['token' => $token]);
-        //$repository = $entityManager->getRepository(User::class);
-        //$user_db = $repository->findOneBy(['username' => 'Keyboard']);
 
             if (!$user_db) {
                 throw $this->createNotFoundException(
@@ -230,7 +176,6 @@ class UserController extends AbstractController
             );
 
             $user_db->setPassword($hashedPassword);
-            //$user_db->setToken('null');
             $entityManager->persist($user_db);
             $entityManager->flush();
 
